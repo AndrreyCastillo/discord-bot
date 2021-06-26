@@ -3,13 +3,13 @@
 
 const Discord = require('discord.js'); // Import the discord.js module, the backbone of the progam
 const fs = require('fs'); // Node's native file system module (https://nodejs.org/api/fs.html)
-const {prefix} = require('./config.json'); // for configurations variables that are public
+const {prefix, jelly_private_channel_id} = require('./config.json'); // for configurations variables that are public
 const env = require('dotenv').config(); // environment variables, unseen to the naked eye
 
 // Create an instance of a Discord bot (https://discord.js.org/#/docs/main/stable/class/Client)
 const bot = new Discord.Client(); 
 
-// Collection Class extend JavaScript's native Map class and include more extensive, useful functionality. 
+// Kind of like a Map but for discord (https://discordjs.guide/additional-info/collections.html)
 bot.commands = new Discord.Collection(); 
 
 const commandFolders = fs.readdirSync('./commands');
@@ -37,6 +37,12 @@ for (const folder of commandFolders) {
  */
 bot.on('ready', () => {
 	console.log('I am ready!');
+
+	// Sends a message to the Jelly private channel when the bot is up and running
+	client.channels.fetch(jelly_private_channel_id)
+    .then(channel => {
+        channel.send("The time of man has come to an end.");
+    })
 });
 
 // Create an event listener for messages
