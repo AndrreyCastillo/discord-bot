@@ -1,17 +1,32 @@
 'use strict'; // The purpose of "use strict" is to indicate that the code should be executed in "strict mode".
               // With strict mode, you can not, for example, use undeclared variables.
 
-// Import the discord.js module
-const Discord = require('discord.js');
+const Discord = require('discord.js'); // Import the discord.js module, the backbone of the progam
+const fs = require('fs'); // Node's native file system module (https://nodejs.org/api/fs.html)
+const {prefix} = require('./config.json'); // for configurations variables that are public
+const env = require('dotenv').config(); // environment variables, unseen to the naked eye
 
-// for configurations variables that are public
-const {prefix} = require('./config.json');
+// Create an instance of a Discord bot (https://discord.js.org/#/docs/main/stable/class/Client)
+const bot = new Discord.Client(); 
 
-// environment variables, unseen to the naked eye
-require('dotenv').config();
+// Collection Class extend JavaScript's native Map class and include more extensive, useful functionality. 
+bot.commands = new Discord.Collection(); 
 
-// Create an instance of a Discord bot
-const bot = new Discord.Client();
+const commandFolders = fs.readdirSync('./commands');
+for (const folder of commandFolders) {
+	
+	// The fs.readdirSync() method will return an array of all the file names in a directory, e.g. ['ping.js', 'beep.js']
+	// .filter() makes sure we only use command files
+	const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+
+	for (const file of commandFiles) {
+		const command = require(`./commands/${folder}/${file}`);
+
+		// set a new item in the bot.commands Collection
+		// with the key as the command name and the value as the exported module
+		bot.commands.set(command.name, command);
+	}
+}
 
 
 
@@ -21,54 +36,56 @@ const bot = new Discord.Client();
  * received from Discord
  */
 bot.on('ready', () => {
-  console.log('I am ready!');
+	console.log('I am ready!');
 });
- 
+
 // Create an event listener for messages
-bot.on('message', message => {
+bot.on("message", message => {
 
-  if (message.author.bot) return false;
+	if (message.author.bot) return;
+	if (message.content.includes("@here") || message.content.includes("@everyone")) return false;
 
-  if (message.content.includes("@here") || message.content.includes("@everyone")) return false;
+	// When the bot is @'ed
+	if (message.mentions.has(bot.user.id)) {
+		message.channel.send('Hey there!!');
+		message.react("👍");
+	}
 
-  if (message.mentions.has(bot.user.id)) {
-    message.channel.send('die');
-    message.react("👍");
-  }
+	// When the name "frazee" is anywhere in a message
+	if ((message.content.toLowerCase()).includes('frazee')) {
+		message.reply('This is a Frazee!', {files:['./media/frazee.png']});
+	}
 
-  
-  if ((message.content.toLowerCase()).includes('frazee')) {
-    message.reply('This is a Frazee!', {files:['./media/frazee.png']});
-  }
+	// When the name "joe" is anywhere in a message
+	if ((message.content.toLowerCase()).includes('joe')) {
+		message.reply('JOE MAMA!!', {files:['./media/vna.png']});
+	}
 
-  if ((message.content.toLowerCase()).includes('joe')) {
-    message.reply('JOE MAMA!!', {files:['./media/vna.png']});
-  }
+	// when "so true" is anywhere in a message
+	if((message.content.toLowerCase()).includes('so true')) {
+		message.channel.send('SO TRUE BESTIE');
+	}
 
-  if (message.content === `${prefix}hello`) {
-    message.channel.send('hi');
-  }
-  
-  
+	// when a message is in the "polls" channel
+	if (message.channel.name === 'polls') {
+		message.react('👍');
+	}
 
-  // If the message is "ping"
-  if (message.content === `${prefix}ping`) {
-    // Send "pong" to the same channel
-    message.channel.send('pong');
-  }
+	// ----------- HANDLES COMMANDS WITH PREFIX AFTER THIS POINT -------------
+	if (!message.content.startsWith(prefix)) return;
 
-  if (message.content === `${prefix}stan`) {
-    // Send "pong" to the same channel
-    message.channel.send('loona');
-  }
+	const args = message.content.slice(prefix.length).trim().split(/ +/); // holds any arguments e.g. !ping all; where all is an arg 
+	const commandName = args.shift().toLowerCase();
 
-  if (message.channel.id === 'polls') {
-    message.react('👍');
-  }
+	if (!bot.commands.has(commandName)) return; // if a command given by user is not in our commands folder then return
 
-  if((message.content.toLowerCase()).includes('so true')) {
-    message.channel.send('ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ');
-  }
+	const command = client.commands.get(commandName);
+	try {
+		command.execute(message, args); // executes the execute() function of the command
+	} catch (error) {
+		console.error(error);
+		message.reply('There was an error trying to execute that command!');
+	}
 });
  
 // Log our bot in using the token from https://discord.com/developers/applications
