@@ -1,6 +1,32 @@
 {
+  "name": "discord-bot",
+  "description": "a custom discord bot for personal/friends use",
+  "version": "1.0.0",
+  "main": "bot.js",
   "dependencies": {
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test.js",
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimx427/discord-bot.git"
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "discord.js",
+    "bot",
+    "jelly"
+  ],
+  "author": "kimx427",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kimx427/discord-bot/issues"
+  },
+  "homepage": "https://github.com/kimx427/discord-bot#readme"
 }
