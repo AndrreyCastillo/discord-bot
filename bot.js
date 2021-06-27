@@ -35,7 +35,7 @@ for (const folder of commandFolders) {
  * The ready event is vital, it means that only _after_ this will your bot start reacting to information
  * received from Discord
  */
-bot.on('ready', () => {
+bot.once('ready', () => {
 	console.log('I am ready!');
 
 	// Sends a message to the Jelly private channel when the bot is up and running
